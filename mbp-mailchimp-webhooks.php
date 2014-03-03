@@ -23,10 +23,10 @@ if ($_GET['key'] != md5('DoSomething.org')) {
 if ($_POST['type'] == 'unsubscribe') {
    // Pull RabbitMQ credentials from environment vars. Otherwise, default to local settings.
    $credentials = array();
-   $credentials['host'] = isset(getenv('RABBITMQ_HOST')) ? getenv('RABBITMQ_HOST') : 'localhost';
-   $credentials['port'] = isset(getenv('RABBITMQ_PORT')) ? getenv('RABBITMQ_PORT') : '5672';
-   $credentials['user'] = isset(getenv('RABBITMQ_USERNAME')) ? getenv('RABBITMQ_USERNAME') : 'guest';
-   $credentials['password'] = isset(getenv('RABBITMQ_PASSWORD')) ? getenv('RABBITMQ_PASSWORD') : 'guest';
+   $credentials['host'] = getenv('RABBITMQ_HOST') ? getenv('RABBITMQ_HOST') : 'localhost';
+   $credentials['port'] = getenv('RABBITMQ_PORT') ? getenv('RABBITMQ_PORT') : '5672';
+   $credentials['user'] = getenv('RABBITMQ_USERNAME') ? getenv('RABBITMQ_USERNAME') : 'guest';
+   $credentials['password'] = getenv('RABBITMQ_PASSWORD') ? getenv('RABBITMQ_PASSWORD') : 'guest';
 
    // Create connection
    $connection = new AMQPConnection(
