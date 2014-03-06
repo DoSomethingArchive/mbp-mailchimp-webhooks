@@ -36,26 +36,44 @@ if ($_POST['type'] == 'unsubscribe') {
       $credentials['password']
    );
 
-   // Name the direct exchange the channel will connect to
-   $exchangeName = 'ds.direct_mailchimp_webhooks';
+   // Name of the direct exchange the channel will connect to
+   $exchangeName = 'direct_mailchimp_webhooks';
 
-   // Set the routing key that
+   // Set the routing key
    $routingKey = 'mailchimp-unsubscribe';
 
+   // Channel
    $channel = $connection->channel();
+
+   // Setup the queue
+   $queueName = 'mailchimp-unsubscribe-queue';
+   $channel->queue_declare(
+      $queueName,    // queue name
+      false,         // passive
+      true,          // durable
+      false,         // exclusive
+      false          // auto_delete
+   );
+
+   // Setup the exchange
    $channel->exchange_declare(
       $exchangeName,  // exchange name
       'direct',       // exchange type
       false,          // passive
-      false,          // durable
+      true,           // durable
       false           // auto_delete
    );
+
+   // Bind the queue to the exchange
+   $channel->queue_bind($queueName, $exchangeName, $routingKey);
 
    // Serialize $_POST data to throw into message body
    $serializedData = serialize($_POST);
 
    // Publish AMQPMessage to direct_mailchimp_webhooks exchange
-   $message = new AMQPMessage($serializedData);
+   // Mark messages as persistent by setting the delivery_mode = 2
+   // @see https://github.com/videlalvaro/php-amqplib/blob/master/doc/AMQPMessage.md
+   $message = new AMQPMessage($serializedData, array('delivery_mode' => 2));
    $channel->basic_publish($message, $exchangeName, $routingKey);
 
    $channel->close();
