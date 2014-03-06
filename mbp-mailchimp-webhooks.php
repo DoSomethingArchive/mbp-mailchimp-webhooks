@@ -42,7 +42,20 @@ if ($_POST['type'] == 'unsubscribe') {
    // Set the routing key
    $routingKey = 'mailchimp-unsubscribe';
 
+   // Channel
    $channel = $connection->channel();
+
+   // Setup the queue
+   $queueName = 'mailchimp-unsubscribe-queue';
+   $channel->queue_declare(
+      $queueName,    // queue name
+      false,         // passive
+      true,          // durable
+      false,         // exclusive
+      false          // auto_delete
+   );
+
+   // Setup the exchange
    $channel->exchange_declare(
       $exchangeName,  // exchange name
       'direct',       // exchange type
@@ -50,6 +63,9 @@ if ($_POST['type'] == 'unsubscribe') {
       true,           // durable
       false           // auto_delete
    );
+
+   // Bind the queue to the exchange
+   $channel->queue_bind($queueName, $exchangeName, $routingKey);
 
    // Serialize $_POST data to throw into message body
    $serializedData = serialize($_POST);
