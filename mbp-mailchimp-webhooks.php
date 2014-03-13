@@ -13,6 +13,7 @@ use PhpAmqpLib\Message\AMQPMessage;
 
 // Load configuration settings common to the Message Broker system.
 // Symlinks in the project directory point to the actual location of the files.
+require('mb-secure-config.inc');
 require('mb-config.inc');
 
 // Require a valid secret key before processing the webhook request.
