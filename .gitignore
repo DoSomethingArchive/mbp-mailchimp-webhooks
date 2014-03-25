@@ -1,3 +1,7 @@
 # Composer files
 composer.lock
 vendor/
+
+# Message Broker config files
+mb-config.inc
+mb-secure-config.inc

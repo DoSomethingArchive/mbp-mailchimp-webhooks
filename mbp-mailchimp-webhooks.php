@@ -11,6 +11,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 
+// Load configuration settings common to the Message Broker system.
+// Symlinks in the project directory point to the actual location of the files.
+require('mb-secure-config.inc');
+require('mb-config.inc');
+
 // Require a valid secret key before processing the webhook request.
 if ($_GET['key'] != md5('DoSomething.org')) {
   echo "Invalid key.\n";
@@ -28,7 +33,7 @@ if ($_POST['type'] == 'unsubscribe') {
 
   $config = array(
     // Routing key
-    'routingKey' => 'mailchimp-unsubscribe',
+    'routingKey' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_ROUTING_KEY'),
 
     // Consume options
     'consume' => array(
@@ -41,20 +46,20 @@ if ($_POST['type'] == 'unsubscribe') {
 
     // Exchange options
     'exchange' => array(
-      'name' => 'direct-mailchimp-webhooks',
-      'type' => 'direct',
-      'passive' => FALSE,
-      'durable' => TRUE,
-      'auto_delete' => FALSE,
+      'name' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_EXCHANGE'),
+      'type' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_EXCHANGE_TYPE'),
+      'passive' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_EXCHANGE_PASSIVE'),
+      'durable' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_EXCHANGE_DURABLE'),
+      'auto_delete' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_EXCHANGE_AUTO_DELETE'),
     ),
 
     // Queue options
     'queue' => array(
-      'name' => 'mailchimp-unsubscribe-queue',
-      'passive' => FALSE,
-      'durable' => TRUE,
-      'exclusive' => FALSE,
-      'auto_delete' => FALSE,
+      'name' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE'),
+      'passive' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_PASSIVE'),
+      'durable' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_DURABLE'),
+      'exclusive' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_EXCLUSIVE'),
+      'auto_delete' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_AUTO_DELETE'),
     ),
   );
 
