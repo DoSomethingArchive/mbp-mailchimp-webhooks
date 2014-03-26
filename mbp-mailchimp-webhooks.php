@@ -55,11 +55,14 @@ if ($_POST['type'] == 'unsubscribe') {
 
     // Queue options
     'queue' => array(
-      'name' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE'),
-      'passive' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_PASSIVE'),
-      'durable' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_DURABLE'),
-      'exclusive' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_EXCLUSIVE'),
-      'auto_delete' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_AUTO_DELETE'),
+      'mailchimp-webhook' => array(
+        'name' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE'),
+        'passive' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_PASSIVE'),
+        'durable' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_DURABLE'),
+        'exclusive' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_EXCLUSIVE'),
+        'auto_delete' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_AUTO_DELETE'),
+        'bindingKey' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_ROUTING_KEY'),
+      ),
     ),
   );
 
