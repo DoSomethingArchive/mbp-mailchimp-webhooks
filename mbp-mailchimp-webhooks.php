@@ -30,19 +30,11 @@ if ($_POST['type'] == 'unsubscribe') {
   $credentials['port'] = getenv('RABBITMQ_PORT') ? getenv('RABBITMQ_PORT') : '5672';
   $credentials['username'] = getenv('RABBITMQ_USERNAME') ? getenv('RABBITMQ_USERNAME') : 'guest';
   $credentials['password'] = getenv('RABBITMQ_PASSWORD') ? getenv('RABBITMQ_PASSWORD') : 'guest';
+  $credentials['vhost'] = getenv('RABBITMQ_VHOST') ? getenv('RABBITMQ_VHOST') : '';
 
   $config = array(
     // Routing key
     'routingKey' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_ROUTING_KEY'),
-
-    // Consume options
-    'consume' => array(
-      'consumer_tag' => '',
-      'no_local' => FALSE,
-      'no_ack' => FALSE,
-      'exclusive' => FALSE,
-      'nowait' => FALSE,
-    ),
 
     // Exchange options
     'exchange' => array(
