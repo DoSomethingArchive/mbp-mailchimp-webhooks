@@ -10,34 +10,33 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use DoSomething\MBStatTracker\StatHat;
+
 
 // Load configuration settings common to the Message Broker system.
 // Symlinks in the project directory point to the actual location of the files.
 require('mb-secure-config.inc');
 require('mb-config.inc');
 
-// Setup StatHat lib and vars to track events received and sent
-require('stathat.php');
-$statName = 'mbp-mailchimp-webhooks:~';
-
+$statHat = new StatHat(getenv('STATHAT_EZKEY'), 'mbp-mailchimp-webhooks:');
 
 // Require a valid secret key before processing the webhook request.
 if (!isset($_GET['key']) || $_GET['key'] != md5('DoSomething.org')) {
   echo "Invalid key.\n";
 
   // Report to StatHat that a query was received with an invalid key.
-  $statName .= 'invalid key';
-  stathat_ez_count(getenv('STATHAT_EZKEY'), $statName, 1);
+  $statHat->addStatName('invalid key');
+  $statHat->reportCount(1);
 
   return;
 }
 
 // Report to StatHat all received webhook events.
 if (isset($_POST['type'])) {
-  $statName .= 'received: ' . $_POST['type'] . ',';
+  $statHat->addStatName('received: ' . $_POST['type']);
 }
 else {
-  $statName .= 'no event type';
+  $statHat->addStatName('no event type');
 }
 
 // Verify type is 'unsubscribe'
@@ -93,10 +92,10 @@ if ($_POST['type'] == 'unsubscribe') {
   $mb->publishMessage($payload);
 
   // Report to StatHat that an event was published to the message broker.
-  $statName .= 'published: ' . $_POST['type'] . ',';
+  $statHat->addStatName('published: ' . $_POST['type']);
 }
 
 // Report to StatHat.
-stathat_ez_count(getenv('STATHAT_EZKEY'), $statName, 1);
+$statHat->reportCount(1);
 
 ?>
