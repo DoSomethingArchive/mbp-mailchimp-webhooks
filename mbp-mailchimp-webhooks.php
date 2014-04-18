@@ -19,6 +19,7 @@ require('mb-secure-config.inc');
 require('mb-config.inc');
 
 $statHat = new StatHat(getenv('STATHAT_EZKEY'), 'mbp-mailchimp-webhooks:');
+$statHat->setIsProduction(getenv('USE_STAT_TRACKING') ? getenv('USE_STAT_TRACKING') : FALSE);
 
 // Require a valid secret key before processing the webhook request.
 if (!isset($_GET['key']) || $_GET['key'] != md5('DoSomething.org')) {
