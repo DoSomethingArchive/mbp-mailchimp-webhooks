@@ -10,27 +10,49 @@
 require_once __DIR__ . '/vendor/autoload.php';
 use PhpAmqpLib\Connection\AMQPConnection;
 use PhpAmqpLib\Message\AMQPMessage;
+use DoSomething\MBStatTracker\StatHat;
+
 
 // Load configuration settings common to the Message Broker system.
 // Symlinks in the project directory point to the actual location of the files.
 require('mb-secure-config.inc');
 require('mb-config.inc');
 
+// Report only a single instance of the events here each time this script is triggered.
+const STATHAT_COUNT = 1;
+
+$statHat = new StatHat(getenv('STATHAT_EZKEY'), 'mbp-mailchimp-webhooks:');
+$statHat->setIsProduction(getenv('USE_STAT_TRACKING') ? getenv('USE_STAT_TRACKING') : FALSE);
+
 // Require a valid secret key before processing the webhook request.
-if ($_GET['key'] != md5('DoSomething.org')) {
+if (!isset($_GET['key']) || $_GET['key'] != md5('DoSomething.org')) {
   echo "Invalid key.\n";
+
+  // Report to StatHat that a query was received with an invalid key.
+  $statHat->addStatName('invalid key');
+  $statHat->reportCount(STATHAT_COUNT);
+
   return;
+}
+
+// Report to StatHat all received webhook events.
+if (isset($_POST['type'])) {
+  $statHat->addStatName('received: ' . $_POST['type']);
+}
+else {
+  $statHat->addStatName('no event type');
 }
 
 // Verify type is 'unsubscribe'
 if ($_POST['type'] == 'unsubscribe') {
   // Pull RabbitMQ credentials from environment vars. Otherwise, default to local settings.
-  $credentials = array();
-  $credentials['host'] = getenv('RABBITMQ_HOST') ? getenv('RABBITMQ_HOST') : 'localhost';
-  $credentials['port'] = getenv('RABBITMQ_PORT') ? getenv('RABBITMQ_PORT') : '5672';
-  $credentials['username'] = getenv('RABBITMQ_USERNAME') ? getenv('RABBITMQ_USERNAME') : 'guest';
-  $credentials['password'] = getenv('RABBITMQ_PASSWORD') ? getenv('RABBITMQ_PASSWORD') : 'guest';
-  $credentials['vhost'] = getenv('RABBITMQ_VHOST') ? getenv('RABBITMQ_VHOST') : '';
+  $credentials = array (
+    'host' => getenv('RABBITMQ_HOST') ? getenv('RABBITMQ_HOST') : 'localhost',
+    'port' => getenv('RABBITMQ_PORT') ? getenv('RABBITMQ_PORT') : '5672',
+    'username' => getenv('RABBITMQ_USERNAME') ? getenv('RABBITMQ_USERNAME') : 'guest',
+    'password' => getenv('RABBITMQ_PASSWORD') ? getenv('RABBITMQ_PASSWORD') : 'guest',
+    'vhost' => getenv('RABBITMQ_VHOST') ? getenv('RABBITMQ_VHOST') : '',
+  );
 
   $config = array(
     // Routing key
@@ -47,7 +69,7 @@ if ($_POST['type'] == 'unsubscribe') {
 
     // Queue options
     'queue' => array(
-      'mailchimp-webhook' => array(
+      array(
         'name' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE'),
         'passive' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_PASSIVE'),
         'durable' => getenv('MB_MAILCHIMP_UNSUBSCRIBE_QUEUE_DURABLE'),
@@ -72,6 +94,12 @@ if ($_POST['type'] == 'unsubscribe') {
   // Serialize data and publish to the message broker.
   $payload = serialize($payloadUnserialized);
   $mb->publishMessage($payload);
+
+  // Report to StatHat that an event was published to the message broker.
+  $statHat->addStatName('published: ' . $_POST['type']);
 }
+
+// Report to StatHat.
+$statHat->reportCount(STATHAT_COUNT);
 
 ?>
