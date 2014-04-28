@@ -18,6 +18,9 @@ use DoSomething\MBStatTracker\StatHat;
 require('mb-secure-config.inc');
 require('mb-config.inc');
 
+// Report only a single instance of the events here each time this script is triggered.
+const STATHAT_COUNT = 1;
+
 $statHat = new StatHat(getenv('STATHAT_EZKEY'), 'mbp-mailchimp-webhooks:');
 $statHat->setIsProduction(getenv('USE_STAT_TRACKING') ? getenv('USE_STAT_TRACKING') : FALSE);
 
@@ -27,7 +30,7 @@ if (!isset($_GET['key']) || $_GET['key'] != md5('DoSomething.org')) {
 
   // Report to StatHat that a query was received with an invalid key.
   $statHat->addStatName('invalid key');
-  $statHat->reportCount(1);
+  $statHat->reportCount(STATHAT_COUNT);
 
   return;
 }
@@ -97,6 +100,6 @@ if ($_POST['type'] == 'unsubscribe') {
 }
 
 // Report to StatHat.
-$statHat->reportCount(1);
+$statHat->reportCount(STATHAT_COUNT);
 
 ?>
