@@ -15,8 +15,8 @@ use DoSomething\MBStatTracker\StatHat;
 
 // Load configuration settings common to the Message Broker system.
 // Symlinks in the project directory point to the actual location of the files.
-require('mb-secure-config.inc');
-require('mb-config.inc');
+require_once __DIR__ . '/messagebroker-config/mb-secure-config.inc';
+require_once __DIR__ . '/messagebroker-config/mb-config.inc';
 
 echo '-------  mbp-mailchimp-webhook START: ' . date('D M j G:i:s T Y') . ' -------', PHP_EOL;
 
