@@ -18,6 +18,8 @@ use DoSomething\MBStatTracker\StatHat;
 require('mb-secure-config.inc');
 require('mb-config.inc');
 
+echo '-------  mbp-mailchimp-webhook START: ' . date('D M j G:i:s T Y') . ' -------', PHP_EOL;
+
 // Report only a single instance of the events here each time this script is triggered.
 const STATHAT_COUNT = 1;
 
@@ -86,6 +88,8 @@ if ($_POST['type'] == 'unsubscribe') {
   // Pass along POST data in its entirety to the message broker.
   $payloadUnserialized = $_POST;
 
+  echo '- mbp-mailchimp-webhook: $_POST: ' . print_r($_POST, TRUE), PHP_EOL;
+
   // Also add application id and timestamp.
   // @see https://github.com/DoSomething/message-broker/wiki/Config
   $payloadUnserialized['application_id'] = 3;
@@ -102,4 +106,4 @@ if ($_POST['type'] == 'unsubscribe') {
 // Report to StatHat.
 $statHat->reportCount(STATHAT_COUNT);
 
-?>
+echo '-------  mbp-mailchimp-webhook END: ' . date('D M j G:i:s T Y') . ' -------', PHP_EOL;

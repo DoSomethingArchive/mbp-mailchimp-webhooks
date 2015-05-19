@@ -5,3 +5,6 @@ vendor/
 # Message Broker config files
 mb-config.inc
 mb-secure-config.inc
+
+# Ignor OSX system files
+.DS_Store
